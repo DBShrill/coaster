@@ -14,21 +14,21 @@ namespace PathCreation.Examples
         public double initspeed;
         public double distanceTravelled;
         public double g;
-        private double h;
         public GameObject cart; 
         private double energy;
         public double v;
         public GameObject floor;
+        public double height;
 
-        public float audioPitch = 1;
-        public float v_normalizer;
+        public double audioPitch = 1;
+        public double v_normalizer;
         AudioSource audioSource;
 
         void Start() {
             if (pathCreator != null)
             {
                 // Subscribed to the pathUpdated event so that we're notified if the path changes during the game
-                energy = g * cart.transform.position.y;
+                energy = g * (cart.transform.position.y - floor.transform.position.y);
                 audioSource = GetComponent<AudioSource>();
                 audioSource.pitch = (float)audioPitch;
             }
@@ -38,16 +38,18 @@ namespace PathCreation.Examples
         {
             if (pathCreator != null)
             {
+                height = cart.transform.position.y - floor.transform.position.y;
                 v = initspeed + Math.Sqrt(2 * ((double)energy - g * (cart.transform.position.y - floor.transform.position.y)));
+                // audioPitch = v / 2;
 
                 distanceTravelled += v * Time.deltaTime;
                 transform.position = pathCreator.path.GetPointAtDistance((float)distanceTravelled, endOfPathInstruction);
                 transform.rotation = pathCreator.path.GetRotationAtDistance((float)distanceTravelled, endOfPathInstruction);
                 
-                audioSource.pitch = audioPitch * (float)v / v_normalizer;
+                audioSource.pitch = (float)v / (float)v_normalizer;
             }
 
-            if (distanceTravelled > pathCreator.path.length)
+            if (distanceTravelled >= pathCreator.path.length)
             {
                 distanceTravelled = 0.0f;
                 audioSource.Stop();
